@@ -1,0 +1,83 @@
+﻿@model List<YksKoclukSistemi.Models.Kullanici>
+
+@{
+    ViewData["Title"] = "Koç Paneli";
+}
+
+<div class="container mt-4">
+    <div class="row">
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold">Öğrencilerim</h3>
+                <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">@Model.Count Öğrenci</span>
+            </div>
+
+            @if (Model.Any())
+            {
+                    <div class="row">
+                    @foreach (var ogrenci in Model)
+                    {
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; transition: transform 0.2s;">
+                                        <div class="card-body d-flex align-items-center p-3">
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3 fw-bold fs-4" 
+                                                 style="width: 60px; height: 60px;">
+                                        @(ogrenci.Ad.Substring(0, 1))
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="fw-bold mb-0">@ogrenci.Ad @ogrenci.Soyad</h5>
+                                                <small class="text-secondary">@ogrenci.Alan</small>
+                                            </div>
+                                            <a asp-action="Programlar" asp-route-ogrenciId="@ogrenci.Id" class="btn btn-outline-primary rounded-circle btn-sm p-2">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                    }
+                    </div>
+            }
+            else
+            {
+                    <div class="alert alert-info text-center py-5 border-0 shadow-sm rounded-4">
+                        <i class="bi bi-info-circle display-4 mb-3 d-block text-info"></i>
+                        Henüz atanan bir öğrenciniz yok.
+                    </div>
+            }
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-white mb-3" style="border-radius: 20px;">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-secondary fw-bold text-uppercase small mb-3">Kontenjan Durumu</h6>
+
+                    <div class="position-relative d-inline-block mb-3">
+                        <div class="display-4 fw-bold text-primary">
+                            @ViewBag.Mevcut <span class="text-muted fs-4">/ @ViewBag.TopKontenjan</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <div class="p-2 bg-light rounded-3 d-flex justify-content-between">
+                            <span class="text-secondary small">Dolu</span>
+                            <span class="fw-bold text-dark">@ViewBag.Mevcut</span>
+                        </div>
+                        <div class="p-2 bg-success bg-opacity-10 rounded-3 d-flex justify-content-between">
+                            <span class="text-success small">Boş Yer</span>
+                            <span class="fw-bold text-success">@ViewBag.Kalan</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm bg-primary text-white" style="border-radius: 20px;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold"><i class="bi bi-lightning-charge me-2"></i>Aktif Ol!</h5>
+                    <p class="small opacity-75 mb-0">Öğrencilerinin programlarını her pazar güncellemeyi unutma.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,104 @@
+﻿@model YksKoclukSistemi.Models.HaftalikProgram
+
+@{
+    ViewData["Title"] = "Program Detayı";
+    var gunler = new[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar" };
+}
+
+<div class="container mt-4 pb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bi bi-calendar-check me-2 text-primary"></i>Haftalık Görevler
+            </h4>
+            <span class="text-secondary small">
+                @Model.BaslangicTarihi.ToString("dd MMM") - @Model.BitisTarihi.ToString("dd MMM yyyy")
+            </span>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Geri Dön
+        </a>
+    </div>
+
+    <div class="row">
+        @foreach (var gun in gunler)
+        {
+            var gunlukGorevler = Model.Gorevler.Where(x => x.Gun == gun).ToList();
+
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px;">
+
+                        <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold text-primary mb-0">@gun</h6>
+                            <span class="badge bg-light text-secondary border">@gunlukGorevler.Count Görev</span>
+                        </div>
+                        <hr class="mt-2 mb-0 opacity-10 mx-3">
+
+                        <div class="card-body">
+                        @if (gunlukGorevler.Any())
+                        {
+                                    <ul class="list-group list-group-flush">
+                                @foreach (var gorev in gunlukGorevler)
+                                {
+                                                <li class="list-group-item px-0 border-0 d-flex align-items-start gap-2">
+                                                    <div class="form-check mt-1">
+                                                        <input class="form-check-input border-2" type="checkbox" 
+                                                               style="cursor: pointer; width: 1.2em; height: 1.2em;"
+                                                               id="gorev_@gorev.Id" 
+                                            @(gorev.YapildiMi ? "checked" : "")
+                                                               onchange="durumDegistir(@gorev.Id)">
+                                                    </div>
+
+                                                    <div class="w-100">
+                                                        <span class="badge bg-primary bg-opacity-10 text-primary mb-1 d-inline-block" style="font-size: 0.7rem;">
+                                                @(gorev.Ders != null ? gorev.Ders.Ad : "Genel")
+                                                        </span>
+
+                                                        <label class="form-check-label d-block text-dark small" for="gorev_@gorev.Id" 
+                                                               style="cursor: pointer; line-height: 1.4; @(gorev.YapildiMi ? "text-decoration: line-through; opacity: 0.5;" : "")" 
+                                                               id="label_@gorev.Id">
+                                                @gorev.Aciklama
+                                                        </label>
+                                                    </div>
+                                                </li>
+                                }
+                                    </ul>
+                        }
+                        else
+                        {
+                                    <div class="text-center py-4 text-muted opacity-50">
+                                        <i class="bi bi-emoji-smile d-block mb-1"></i>
+                                        <small>Boş Gün</small>
+                                    </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            function durumDegistir(id) {
+                fetch('/Ogrenci/GorevDurumDegistir?id=' + id, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        var label = document.getElementById('label_' + id);
+                        if (data.yeniDurum) {
+                            label.style.textDecoration = "line-through";
+                            label.style.opacity = "0.5";
+                        } else {
+                            label.style.textDecoration = "none";
+                            label.style.opacity = "1";
+                        }
+                    }
+                })
+                .catch(error => console.error('Hata:', error));
+            }
+        </script>
+}

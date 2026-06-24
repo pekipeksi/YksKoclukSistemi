@@ -1,0 +1,187 @@
+﻿@model YksKoclukSistemi.Models.HaftalikProgram
+
+@{
+    ViewData["Title"] = "Program Detayı";
+    var gunler = new[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar" };
+}
+
+<div class="container mt-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-calendar-week me-2 text-primary"></i>Haftalık Program Detayı
+            </h4>
+            <span class="text-secondary small">
+                @Model.BaslangicTarihi.ToString("dd MMM") - @Model.BitisTarihi.ToString("dd MMM yyyy")
+            </span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="Programlar" asp-route-ogrenciId="@Model.OgrenciId" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-1"></i> Geri Dön
+            </a>
+
+            <button class="btn btn-primary shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#gorevEkleModal">
+                <i class="bi bi-plus-lg me-1"></i> Yeni Görev
+            </button>
+
+            <form asp-action="HaftaSil" asp-route-id="@Model.Id" method="post" id="formHaftaSil">
+                <button type="button" class="btn btn-outline-danger rounded-pill px-3" onclick="haftaSilOnayi()">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var gun in gunler)
+        {
+            var gunlukGorevler = Model.Gorevler.Where(x => x.Gun == gun).ToList();
+
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold text-primary mb-0">@gun</h6>
+                            <span class="badge bg-light text-secondary border">@gunlukGorevler.Count Görev</span>
+                        </div>
+                        <hr class="mt-2 mb-0 opacity-10 mx-3">
+
+                        <div class="card-body">
+                        @if (gunlukGorevler.Any())
+                        {
+                                    <ul class="list-group list-group-flush">
+                                @foreach (var gorev in gunlukGorevler)
+                                {
+                                                <li class="list-group-item px-0 border-0 d-flex justify-content-between align-items-start">
+                                                    <div class="me-2">
+                                                        <span class="badge bg-primary bg-opacity-10 text-primary mb-1" style="font-size: 0.75rem;">
+                                                @(gorev.Ders != null ? gorev.Ders.Ad : "Genel")
+                                                        </span>
+                                                        <div class="text-dark small" style="line-height: 1.4;">@gorev.Aciklama</div>
+
+                                            @if (gorev.YapildiMi)
+                                            {
+                                                                <span class="text-success x-small fw-bold"><i class="bi bi-check-all"></i> Tamamlandı</span>
+                                            }
+                                                    </div>
+
+                                                    <a href="javascript:void(0);" 
+                                                       onclick="gorevSilOnayi(@gorev.Id, '@Url.Action("GorevSil", new { id = gorev.Id })')" 
+                                                       class="text-danger opacity-50 hover-opacity-100">
+                                                        <i class="bi bi-trash3"></i>
+                                                    </a>
+                                                </li>
+                                }
+                                    </ul>
+                        }
+                        else
+                        {
+                                    <div class="text-center py-4 text-muted opacity-50">
+                                        <i class="bi bi-sun d-block mb-1"></i>
+                                        <small>Boş Gün</small>
+                                    </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="gorevEkleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">Yeni Görev Oluştur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form asp-action="GorevEkle" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="programId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Ders Seçiniz</label>
+                        <select name="dersId" class="form-select border-0 bg-light p-3" style="border-radius: 12px;" required>
+                            <option value="">Listeden seçin...</option>
+                            @if (ViewBag.Dersler != null)
+                            {
+                                foreach (var ders in ViewBag.Dersler)
+                                {
+                                            <option value="@ders.Id">@ders.Ad</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Görev Detayı</label>
+                        <input type="text" name="icerik" class="form-control border-0 bg-light p-3" 
+                               placeholder="Örn: 50 soru çözülecek" style="border-radius: 12px;" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label d-block small fw-bold text-secondary mb-2">Uygulanacak Günler</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var gun in gunler)
+                            {
+                                    <div class="form-check form-check-inline m-0">
+                                        <input class="btn-check" type="checkbox" name="secilenGunler" value="@gun" id="chk_@gun">
+                                        <label class="btn btn-outline-primary btn-sm rounded-pill px-3" for="chk_@gun">
+                                        @gun.Substring(0, 3)
+                                        </label>
+                                    </div>
+                            }
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            // 1. HAFTAYI SİLME UYARISI
+            function haftaSilOnayi() {
+                Swal.fire({
+                    title: 'Haftayı Sil?',
+                    text: "Bu haftayı ve içindeki tüm görevleri silmek istediğine emin misin? Bu işlem geri alınamaz.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Evet, Sil',
+                    cancelButtonText: 'Vazgeç',
+                    background: '#fff',
+                    borderRadius: '20px'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('formHaftaSil').submit();
+                    }
+                })
+            }
+
+            // 2. TEKİL GÖREV SİLME UYARISI
+            function gorevSilOnayi(id, url) {
+                Swal.fire({
+                    title: 'Görevi Sil?',
+                    text: "Bu görevi listeden kaldırmak istiyor musun?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sil',
+                    cancelButtonText: 'Vazgeç'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                })
+            }
+        </script>
+}

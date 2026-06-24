@@ -1,0 +1,127 @@
+﻿@model YksKoclukSistemi.ViewModels.KayitVM
+
+@{
+    ViewData["Title"] = "Kayıt Ol";
+    Layout = null; // Giriş/Kayıt sayfalarında menü olmasın, odak dağılmasın
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Kayıt Ol - Focus</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <style>
+        body { background-color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Segoe UI', sans-serif; }
+        .card { border: none; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; }
+        .btn-brand { background-color: #2563eb; color: white; font-weight: 600; }
+        .btn-brand:hover { background-color: #1d4ed8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card p-4">
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold text-dark">Aramıza Katıl</h3>
+                            <p class="text-secondary small">Hemen hesabını oluştur.</p>
+                        </div>
+
+                        @if (TempData["Mesaj"] != null)
+                        {
+                                <div class="alert alert-danger text-center p-2 small">@TempData["Mesaj"]</div>
+                        }
+
+                        <form asp-action="Kayit" method="post">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-secondary">Ad</label>
+                                    <input asp-for="Ad" class="form-control bg-light border-0 py-2" placeholder="Adınız" />
+                                    <span asp-validation-for="Ad" class="text-danger small"></span>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-secondary">Soyad</label>
+                                    <input asp-for="Soyad" class="form-control bg-light border-0 py-2" placeholder="Soyadınız" />
+                                    <span asp-validation-for="Soyad" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label small fw-bold text-secondary">E-Posta</label>
+                                <input asp-for="Email" class="form-control bg-light border-0 py-2" placeholder="ornek@email.com" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label small fw-bold text-secondary">Şifre</label>
+                                <input asp-for="Sifre" type="password" class="form-control bg-light border-0 py-2" placeholder="******" />
+                                <span asp-validation-for="Sifre" class="text-danger small"></span>
+                            </div>
+                             <div class="mt-3">
+                                <label class="form-label small fw-bold text-secondary">Şifre Tekrar</label>
+                                <input asp-for="SifreTekrar" type="password" class="form-control bg-light border-0 py-2" placeholder="******" />
+                                <span asp-validation-for="SifreTekrar" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label small fw-bold text-secondary">Rolünüz</label>
+                                <select asp-for="Rol" class="form-select bg-light border-0 py-2" id="rolSecimi" onchange="rolDegisti()">
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Ogrenci">Öğrenci (Koç Arıyorum)</option>
+                                    <option value="Koc">Koç (Öğrenci Arıyorum)</option>
+                                </select>
+                                <span asp-validation-for="Rol" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mt-3" id="alanKutusu" style="display:none;">
+                                <label class="form-label small fw-bold text-secondary">Alanınız</label>
+                                <select asp-for="Alan" class="form-select bg-light border-0 py-2">
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Sayisal">Sayısal</option>
+                                    <option value="Sozel">Sözel</option>
+                                    <option value="EsitAgirlik">Eşit Ağırlık</option>
+                                    <option value="Dil">Dil</option>
+                                </select>
+                            </div>
+
+                            <div class="mt-3" id="kontenjanKutusu" style="display:none;">
+                                <label class="form-label small fw-bold text-secondary">Öğrenci Kontenjanı</label>
+                                <input asp-for="Kontenjan" type="number" class="form-control bg-light border-0 py-2" placeholder="Örn: 10" min="1" max="20" />
+                                <div class="form-text small">En az 1, en fazla 20 öğrenci alabilirsiniz.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-brand w-100 mt-4 py-2 rounded-3 shadow-sm">Kayıt Ol</button>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <span class="text-muted small">Zaten hesabın var mı?</span>
+                            <a asp-action="Login" class="text-decoration-none fw-bold small">Giriş Yap</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function rolDegisti() {
+            var rol = document.getElementById("rolSecimi").value;
+            var alanDiv = document.getElementById("alanKutusu");
+            var kontDiv = document.getElementById("kontenjanKutusu");
+
+            // Hepsini gizle
+            alanDiv.style.display = "none";
+            kontDiv.style.display = "none";
+
+            // Role göre aç
+            if (rol === "Ogrenci") {
+                alanDiv.style.display = "block";
+            } else if (rol === "Koc") {
+                kontDiv.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+﻿@model YksKoclukSistemi.ViewModels.LoginVM
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-lg overflow-hidden" style="border-radius: 25px;">
+
+            <div class="bg-primary py-4 text-center">
+                <h4 class="text-white fw-bold mb-0">YKS Koçluk Giriş</h4>
+            </div>
+
+            <div class="card-body p-5 bg-white">
+
+                @* Sadece Hata Mesajlarını Göster *@
+                @if (TempData["Mesaj"] != null && Convert.ToBoolean(TempData["BasariliMi"]) == false)
+                {
+                        <div class="alert alert-danger border-0 small py-2 mb-4" style="border-radius: 10px;">
+                            <i class="bi bi-exclamation-circle me-2"></i> @TempData["Mesaj"]
+                        </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div class="mb-4">
+                        <label asp-for="Email" class="form-label small fw-bold text-secondary">E-Posta</label>
+                        <input asp-for="Email" class="form-control border-0 bg-light p-3" 
+                               placeholder="ornek@email.com" style="border-radius: 12px;" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-5">
+                        <label asp-for="Sifre" class="form-label small fw-bold text-secondary">Şifre</label>
+                        <input asp-for="Sifre" type="password" class="form-control border-0 bg-light p-3" 
+                               placeholder="******" style="border-radius: 12px;" />
+                        <span asp-validation-for="Sifre" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm mb-4" 
+                            style="border-radius: 12px; letter-spacing: 0.5px;">
+                        Giriş Yap
+                    </button>
+                </form>
+
+                <div class="text-center">
+                    <a asp-action="Kayit" class="text-primary text-decoration-none small fw-bold">
+                        Hesabın yok mu? Kayıt Ol
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Input odaklandığında mavi çerçeve yerine hafif bir gölge vermesi için */
+    .form-control:focus {
+        background-color: #f8f9fa;
+        box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.1);
+        border: none;
+    }
+</style>

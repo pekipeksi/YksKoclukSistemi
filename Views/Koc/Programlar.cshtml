@@ -1,0 +1,89 @@
+﻿@model List<YksKoclukSistemi.Models.HaftalikProgram>
+
+@{
+    ViewData["Title"] = "Haftalık Programlar";
+    var ogrenci = ViewBag.Ogrenci as YksKoclukSistemi.Models.Kullanici;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">📅 Haftalık Planlar</h3>
+            <p class="text-secondary mb-0">
+                <span class="fw-bold text-dark">@ogrenci?.Ad @ogrenci?.Soyad</span> adlı öğrencinin programları
+            </p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Geri Dön
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-2 border-dashed border-primary bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-center p-4" 
+                 style="border-radius: 15px; cursor: pointer; transition: all 0.2s;" 
+                 data-bs-toggle="modal" data-bs-target="#yeniHaftaModal"
+                 onmouseover="this.style.transform='scale(1.02)'" 
+                 onmouseout="this.style.transform='scale(1)'">
+                <div>
+                    <div class="display-4 text-primary mb-2"><i class="bi bi-plus-circle"></i></div>
+                    <h5 class="fw-bold text-primary">Yeni Hafta Oluştur</h5>
+                    <p class="text-primary opacity-75 small mb-0">Tıklayıp tarih seçin</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null)
+        {
+            @foreach (var prog in Model)
+            {
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 border-0 shadow-sm" style="border-radius: 15px;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="badge bg-primary rounded-pill px-3">Haftalık Plan</span>
+
+                                        <small class="text-secondary">@(prog.Gorevler != null ? prog.Gorevler.Count : 0) Görev</small>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1">@prog.BaslangicTarihi.ToString("dd MMMM")</h5>
+                                    <p class="text-secondary small mb-4">@prog.BitisTarihi.ToString("dd MMMM")</p>
+
+                                    <a asp-action="ProgramDetay" asp-route-programId="@prog.Id" class="btn btn-light w-100 text-primary fw-bold rounded-3">
+                                        İncele <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="yeniHaftaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">Yeni Hafta Başlat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form asp-action="HaftaEkle" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ogrenciId" value="@ogrenci?.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Başlangıç Tarihi</label>
+                        <input type="date" name="baslangicTarihi" class="form-control bg-light border-0 p-3" 
+                               value="@DateTime.Today.ToString("yyyy-MM-dd")" style="border-radius: 12px;" required />
+                    </div>
+
+                    <div class="alert alert-info border-0 bg-info-subtle text-info small">
+                        <i class="bi bi-info-circle me-1"></i> Bitiş tarihi otomatik olarak 7 gün sonrası ayarlanacaktır.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3">Programı Oluştur</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

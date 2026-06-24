@@ -1,0 +1,266 @@
+﻿@model YksKoclukSistemi.ViewModels.KullaniciAramaVM
+
+@{
+    ViewData["Title"] = "Yönetici Paneli";
+
+    // Güvenli sayım (Null kontrolü ile)
+    var ogrenciSayisi = Model.Kullanicilar.Count(x => x.Rol?.Trim() == "Ogrenci");
+    var kocSayisi = Model.Kullanicilar.Count(x => x.Rol?.Trim() == "Koc");
+    var toplam = Model.Kullanicilar.Count;
+}
+
+<div class="container mt-4 pb-5">
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 h-100 bg-primary text-white" style="border-radius: 20px;">
+                <div class="card-body d-flex align-items-center">
+                    <i class="bi bi-backpack display-4 me-3 opacity-50"></i>
+                    <div><h6 class="fw-bold mb-0 opacity-75">Öğrenci</h6><h2 class="fw-bold mb-0">@ogrenciSayisi</h2></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 h-100 bg-white" style="border-radius: 20px;">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-person-workspace h4 mb-0"></i>
+                    </div>
+                    <div><h6 class="text-secondary fw-bold mb-0">Koç Sayısı</h6><h2 class="fw-bold mb-0 text-dark">@kocSayisi</h2></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 h-100 bg-white" style="border-radius: 20px;">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-people h4 mb-0"></i>
+                    </div>
+                    <div><h6 class="text-secondary fw-bold mb-0">Listelenen</h6><h2 class="fw-bold mb-0 text-dark">@toplam</h2></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-search me-2 text-primary"></i>Detaylı Arama</h5>
+            <form asp-action="Index" method="get" class="row g-2">
+
+                <div class="col-md-3">
+                    <input type="text" name="ad" value="@Model.AdAra" class="form-control border-0 bg-light py-3" 
+                           placeholder="Ad veya Soyad ara..." style="border-radius: 12px;">
+                </div>
+
+                <div class="col-md-2">
+                    <select name="rol" class="form-select border-0 bg-light py-3" style="border-radius: 12px;">
+                        <option value="">Tüm Roller</option>
+                        <option value="Ogrenci" selected="@(Model.RolAra == "Ogrenci")">Öğrenci</option>
+                        <option value="Koc" selected="@(Model.RolAra == "Koc")">Koç</option>
+                        <option value="Yonetici" selected="@(Model.RolAra == "Yonetici")">Yönetici</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="alan" class="form-select border-0 bg-light py-3" style="border-radius: 12px;">
+                        <option value="">Tüm Alanlar</option>
+                        <option value="Sayisal" selected="@(Model.AlanAra == "Sayisal")">Sayısal</option>
+                        <option value="Sozel" selected="@(Model.AlanAra == "Sozel")">Sözel</option>
+                        <option value="EsitAgirlik" selected="@(Model.AlanAra == "EsitAgirlik")">Eşit Ağırlık</option>
+                        <option value="Dil" selected="@(Model.AlanAra == "Dil")">Dil</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <select name="durum" class="form-select border-0 bg-light py-3" style="border-radius: 12px;">
+                        <option value="">Atama Durumu</option>
+                        <option value="Atanmis" selected="@(Model.DurumAra == "Atanmis")">Koçu Var (Atanmış)</option>
+                        <option value="Atanmamis" selected="@(Model.DurumAra == "Atanmamis")">Koçu Yok (Boşta)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary fw-bold py-3" style="border-radius: 12px;">Filtrele</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 20px;">
+        <div class="card-header bg-white border-0 p-4 pb-0">
+            <h5 class="fw-bold mb-0">Sonuç Listesi</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary">
+                        <tr>
+                            <th class="ps-4 py-3 small fw-bold text-uppercase">Kullanıcı</th>
+                            <th class="py-3 small fw-bold text-uppercase">Rol / Alan</th>
+                            <th class="py-3 small fw-bold text-uppercase">Mevcut Koç</th>
+                            <th class="pe-4 py-3 text-end small fw-bold text-uppercase">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Kullanicilar.Any())
+                        {
+                            @foreach (var user in Model.Kullanicilar)
+                            {
+                                var rol = user.Rol?.Trim();
+
+                                        <tr>
+                                            <td class="ps-4 py-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 fw-bold text-primary"
+                                                         style="width: 40px; height: 40px;">
+                                                @((!string.IsNullOrEmpty(user.Ad)) ? user.Ad.Substring(0, 1) : "?")@((!string.IsNullOrEmpty(user.Soyad)) ? user.Soyad.Substring(0, 1) : "?")
+                                                    </div>
+                                                    <div>
+                                                        <span class="d-block fw-bold text-dark">@user.Ad @user.Soyad</span>
+                                                        <span class="small text-secondary">@user.Email</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                        @if (rol == "Ogrenci")
+                                        {
+                                                        <span class="badge bg-primary rounded-pill px-3 mb-1">Öğrenci</span>
+                                                        <div class="small text-muted">@(user.Alan ?? "-")</div>
+                                        }
+                                        else if (rol == "Koc")
+                                        {
+                                                        <span class="badge bg-info text-dark rounded-pill px-3">Koç</span>
+                                        }
+                                        else
+                                        {
+                                                        <span class="badge bg-dark rounded-pill px-3">Yönetici</span>
+                                        }
+                                            </td>
+                                            <td>
+                                        @if (rol == "Ogrenci")
+                                        {
+                                            if (user.Koc != null)
+                                            {
+                                                                <span class="d-flex align-items-center gap-2">
+                                                                    <i class="bi bi-person-check-fill text-success"></i>
+                                                                    <span class="fw-bold text-dark">@user.Koc.Ad @user.Koc.Soyad</span>
+                                                                </span>
+                                            }
+                                            else
+                                            {
+                                                                <span class="badge bg-warning text-dark border border-warning px-2">Atanmamış</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                                        <span class="text-muted">-</span>
+                                        }
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                        @if (rol == "Ogrenci")
+                                        {
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-outline-primary border-0 bg-primary-subtle text-primary fw-bold rounded-pill px-3 me-2"
+                                                                onclick="kocAtaModalAc(@user.Id, '@user.Ad @user.Soyad')">
+                                                            <i class="bi bi-arrow-left-right me-1"></i> Koç Ata
+                                                        </button>
+                                        }
+
+                                                <form asp-action="KullaniciSil" asp-route-id="@user.Id" method="post" class="d-inline" id="formSil_@user.Id">
+                                                    <button type="button" onclick="silmeOnayiAc('formSil_@user.Id')" 
+                                                            class="btn btn-sm btn-light text-danger hover-bg-danger rounded-circle p-2">
+                                                        <i class="bi bi-trash3"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                            }
+                        }
+                        else
+                        {
+                                 <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-search h1 d-block mb-3 opacity-25"></i>
+                                        Aradığınız kriterlere uygun kayıt bulunamadı.
+                                    </td>
+                                </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="kocAtaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold">Koç Ata</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="KocAta" method="post">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="ogrenciId" id="modalOgrenciId" />
+                    <p class="text-secondary mb-3">
+                        <span id="modalOgrenciAd" class="fw-bold text-dark"></span> adlı öğrenciye koç atayın:
+                    </p>
+                    <select name="kocId" class="form-select border-0 bg-light p-3" style="border-radius: 12px;" required>
+                        <option value="">Koç Seçiniz...</option>
+                        @if (ViewBag.Koclar != null)
+                        {
+                            foreach (var koc in ViewBag.Koclar)
+                            {
+                                // --- DÜZELTİLEN KISIM: KONTENJAN KONTROLÜ ---
+                                // AdminController'dan gelen Dolu ve Kontenjan bilgisini kullanıyoruz
+                                bool doluMu = koc.Dolu >= koc.Kontenjan;
+                                string durum = doluMu ? "(DOLU)" : $"({koc.Dolu}/{koc.Kontenjan})";
+
+                                        <option value="@koc.Id" disabled="@doluMu">
+                                    @koc.Ad @koc.Soyad @durum
+                                        </option>
+                            }
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-primary w-100 py-3 mt-3 fw-bold rounded-3">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="silmeOnayiModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-body text-center p-4 pt-5">
+                <div class="mb-3 mx-auto d-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle" style="width: 70px; height: 70px;">
+                    <i class="bi bi-trash3-fill display-5"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Silmek Emin misin?</h5>
+                <p class="text-secondary small mb-4">Bu işlem geri alınamaz.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="button" id="kesinSilBtn" class="btn btn-danger rounded-pill px-4 fw-bold">Evet, Sil</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            var silinecekFormId = "";
+            function kocAtaModalAc(id, adSoyad) {
+                document.getElementById('modalOgrenciId').value = id;
+                document.getElementById('modalOgrenciAd').innerText = adSoyad;
+                new bootstrap.Modal(document.getElementById('kocAtaModal')).show();
+            }
+            function silmeOnayiAc(formId) {
+                silinecekFormId = formId;
+                new bootstrap.Modal(document.getElementById('silmeOnayiModal')).show();
+            }
+            document.getElementById('kesinSilBtn').addEventListener('click', function() {
+                if (silinecekFormId) document.getElementById(silinecekFormId).submit();
+            });
+        </script>
+}
